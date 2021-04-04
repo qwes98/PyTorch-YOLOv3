@@ -1,15 +1,18 @@
 from __future__ import division
 from itertools import chain
 
+# Import torch modules
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 import numpy as np
 
+# Import utils
 from utils.parse_config import *
 from utils.utils import build_targets, to_cpu, non_max_suppression
 
+# Import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
