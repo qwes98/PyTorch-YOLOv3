@@ -41,11 +41,11 @@ if __name__ == "__main__":
     parser.add_argument("--pretrained_weights", type=str, help="if specified starts from checkpoint model") # path to pretrained weights file
     parser.add_argument("--n_cpu", type=int, default=8, help="number of cpu threads to use during batch generation") # number of cpu
     parser.add_argument("--img_size", type=int, default=416, help="size of each image dimension") # size of input image
-    parser.add_argument("--checkpoint_interval", type=int, default=1, help="interval between saving model weights") # 
-    parser.add_argument("--evaluation_interval", type=int, default=1, help="interval evaluations on validation set")
-    parser.add_argument("--multiscale_training", default=True, help="allow for multi-scale training")
-    parser.add_argument("--verbose", "-v", default=False, action='store_true', help="Makes the training more verbose")
-    parser.add_argument("--logdir", type=str, default="logs", help="Defines the directory where the training log files are stored")
+    parser.add_argument("--checkpoint_interval", type=int, default=1, help="interval between saving model weights") # interval time to save checkpoint 
+    parser.add_argument("--evaluation_interval", type=int, default=1, help="interval evaluations on validation set") # interval time to evaluate
+    parser.add_argument("--multiscale_training", default=True, help="allow for multi-scale training") # whether to use multi scale (multi scale makes image to different size)
+    parser.add_argument("--verbose", "-v", default=False, action='store_true', help="Makes the training more verbose") # whether to show logging
+    parser.add_argument("--logdir", type=str, default="logs", help="Defines the directory where the training log files are stored") # path to save log file
     # Read arguments
     opt = parser.parse_args()
     print(opt)
