@@ -4,16 +4,20 @@ def parse_model_config(path):
     """Parses the yolo-v3 layer configuration file and returns module definitions"""
     file = open(path, 'r')
     lines = file.read().split('\n')
-    lines = [x for x in lines if x and not x.startswith('#')]
+    lines = [x for x in lines if x and not x.startswith('#')]   # add lines except for commented line
     lines = [x.rstrip().lstrip() for x in lines] # get rid of fringe whitespaces
-    module_defs = []
+    # Initilize module def list
+    module_defs = []    
     for line in lines:
         if line.startswith('['): # This marks the start of a new block
+            # Add new dictionary in module_defs
             module_defs.append({})
+            # Add type value(except for side bracket) in new dictionary
             module_defs[-1]['type'] = line[1:-1].rstrip()
             if module_defs[-1]['type'] == 'convolutional':
                 module_defs[-1]['batch_normalize'] = 0
         else:
+            # Add config key, value
             key, value = line.split("=")
             value = value.strip()
             module_defs[-1][key.rstrip()] = value.strip()
