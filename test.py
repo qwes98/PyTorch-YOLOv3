@@ -87,16 +87,26 @@ if __name__ == "__main__":
     # Initialize argument parser
     parser = argparse.ArgumentParser()
     # Add arguments
-    parser.add_argument("--batch_size", type=int, default=8, help="size of each image batch")   # mini-batch size
-    parser.add_argument("--model_def", type=str, default="config/yolov3.cfg", help="path to model definition file") # path to model definition
-    parser.add_argument("--data_config", type=str, default="config/coco.data", help="path to data config file")     # path to config for data
-    parser.add_argument("--weights_path", type=str, default="weights/yolov3.weights", help="path to weights file")  # path to model weight file
-    parser.add_argument("--class_path", type=str, default="data/coco.names", help="path to class label file")       # path to output label file
-    parser.add_argument("--iou_thres", type=float, default=0.5, help="iou threshold required to qualify as detected")   # iou threshold for detection
-    parser.add_argument("--conf_thres", type=float, default=0.5, help="object confidence threshold")                    # confidence threshold for nms
-    parser.add_argument("--nms_thres", type=float, default=0.5, help="iou thresshold for non-maximum suppression")      # iou threshold for nms
-    parser.add_argument("--n_cpu", type=int, default=8, help="number of cpu threads to use during batch generation")    # number of cpu we use
-    parser.add_argument("--img_size", type=int, default=416, help="size of each image dimension")   # image size
+    # mini-batch size
+    parser.add_argument("--batch_size", type=int, default=8, help="size of each image batch")   
+    # path to model definition
+    parser.add_argument("--model_def", type=str, default="config/yolov3.cfg", help="path to model definition file") 
+    # path to config for data
+    parser.add_argument("--data_config", type=str, default="config/coco.data", help="path to data config file")     
+    # path to model weight file
+    parser.add_argument("--weights_path", type=str, default="weights/yolov3.weights", help="path to weights file")  
+    # path to output label file
+    parser.add_argument("--class_path", type=str, default="data/coco.names", help="path to class label file")       
+    # iou threshold for detection
+    parser.add_argument("--iou_thres", type=float, default=0.5, help="iou threshold required to qualify as detected")   
+    # confidence threshold for nms
+    parser.add_argument("--conf_thres", type=float, default=0.5, help="object confidence threshold")                    
+    # iou threshold for nms
+    parser.add_argument("--nms_thres", type=float, default=0.5, help="iou thresshold for non-maximum suppression")      
+    # number of cpu we use
+    parser.add_argument("--n_cpu", type=int, default=8, help="number of cpu threads to use during batch generation")    
+    # image size
+    parser.add_argument("--img_size", type=int, default=416, help="size of each image dimension")   
     # Read arguments
     opt = parser.parse_args()
     print(opt)

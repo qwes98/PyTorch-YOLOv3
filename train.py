@@ -35,17 +35,28 @@ if __name__ == "__main__":
     # Initialize argument parser
     parser = argparse.ArgumentParser()
     # Add arguments
-    parser.add_argument("--epochs", type=int, default=300, help="number of epochs") # number of epochs
-    parser.add_argument("--model_def", type=str, default="config/yolov3.cfg", help="path to model definition file") # path to read model cfg file
-    parser.add_argument("--data_config", type=str, default="config/coco.data", help="path to data config file") # path to data cfg file (# of output classes, data path, ...)
-    parser.add_argument("--pretrained_weights", type=str, help="if specified starts from checkpoint model") # path to pretrained weights file
-    parser.add_argument("--n_cpu", type=int, default=8, help="number of cpu threads to use during batch generation") # number of cpu
-    parser.add_argument("--img_size", type=int, default=416, help="size of each image dimension") # size of input image
-    parser.add_argument("--checkpoint_interval", type=int, default=1, help="interval between saving model weights") # interval time to save checkpoint 
-    parser.add_argument("--evaluation_interval", type=int, default=1, help="interval evaluations on validation set") # interval time to evaluate
-    parser.add_argument("--multiscale_training", default=True, help="allow for multi-scale training") # whether to use multi scale (multi scale makes image to different size)
-    parser.add_argument("--verbose", "-v", default=False, action='store_true', help="Makes the training more verbose") # whether to show logging
-    parser.add_argument("--logdir", type=str, default="logs", help="Defines the directory where the training log files are stored") # path to save log file
+    # number of epochs
+    parser.add_argument("--epochs", type=int, default=300, help="number of epochs") 
+    # path to read model cfg file
+    parser.add_argument("--model_def", type=str, default="config/yolov3.cfg", help="path to model definition file") 
+    # path to data cfg file (# of output classes, data path, ...)
+    parser.add_argument("--data_config", type=str, default="config/coco.data", help="path to data config file") 
+    # path to pretrained weights file
+    parser.add_argument("--pretrained_weights", type=str, help="if specified starts from checkpoint model") 
+    # number of cpu
+    parser.add_argument("--n_cpu", type=int, default=8, help="number of cpu threads to use during batch generation") 
+    # size of input image
+    parser.add_argument("--img_size", type=int, default=416, help="size of each image dimension") 
+    # interval time to save checkpoint 
+    parser.add_argument("--checkpoint_interval", type=int, default=1, help="interval between saving model weights") 
+    # interval time to evaluate
+    parser.add_argument("--evaluation_interval", type=int, default=1, help="interval evaluations on validation set") 
+    # whether to use multi scale (multi scale makes image to different size)
+    parser.add_argument("--multiscale_training", default=True, help="allow for multi-scale training") 
+    # whether to show logging
+    parser.add_argument("--verbose", "-v", default=False, action='store_true', help="Makes the training more verbose") 
+    # path to save log file
+    parser.add_argument("--logdir", type=str, default="logs", help="Defines the directory where the training log files are stored") 
     # Read arguments
     opt = parser.parse_args()
     print(opt)
@@ -88,12 +99,12 @@ if __name__ == "__main__":
     dataset = ListDataset(train_path, multiscale=opt.multiscale_training, img_size=opt.img_size, transform=AUGMENTATION_TRANSFORMS)
     # Initialize dataloadaer
     dataloader = torch.utils.data.DataLoader(
-        dataset,                                                                            # Set dataset
-        batch_size= model.hyperparams['batch'] // model.hyperparams['subdivisions'],        # Calculate and set batch size
-        shuffle=True,                                                                       # Use shuffle (the data reshuffled at every epoch)
-        num_workers=opt.n_cpu,                                                              # Set how many subprocesses to use for data loading
-        pin_memory=True,                                                                    # Use pin memory (copying Tensors into CUDA pinned memory)
-        collate_fn=dataset.collate_fn,                                                      # Set collate_fn function (merging a list of samples)                                                   
+        dataset,                                                                     # Set dataset
+        batch_size= model.hyperparams['batch'] // model.hyperparams['subdivisions'], # Calculate and set batch size
+        shuffle=True,                                                                # Use shuffle (the data reshuffled at every epoch)
+        num_workers=opt.n_cpu,                                                       # Set how many subprocesses to use for data loading
+        pin_memory=True,                                                             # Use pin memory (copying Tensors into CUDA pinned memory)
+        collate_fn=dataset.collate_fn,                                               # Set collate_fn function (merging a list of samples)                                                   
     )
 
     # Choose optimizer 
@@ -206,11 +217,11 @@ if __name__ == "__main__":
             metrics_output = evaluate(
                 model,                          # Set model
                 path=valid_path,                # Set valid path             
-                iou_thres=0.5,                  # Set IOU(Intersection Over Union) threshold (This will be used to remove bounding box for same target(object))
+                iou_thres=0.5,                  # Set IOU(Intersection Over Union) threshold (to remove bounding box for same target)
                 conf_thres=0.1,                 # Set confidence threshold (This will be used to remove low confidence bounding box)
                 nms_thres=0.5,                  # Set NMS(Non-Maximun Suppression) threshold 
                 img_size=opt.img_size,          # Set image size
-                batch_size=model.hyperparams['batch'] // model.hyperparams['subdivisions'],     # Set mini batch size considering subdivision 
+                batch_size=model.hyperparams['batch'] // model.hyperparams['subdivisions'],     # Set mini batch size by subdivision 
             )
             
             if metrics_output is not None:
