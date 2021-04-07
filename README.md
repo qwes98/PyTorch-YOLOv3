@@ -1,162 +1,95 @@
-# PyTorch-YOLOv3
-A minimal PyTorch implementation of YOLOv3, with support for training, inference and evaluation.
+# Yolo v3
 
-## Installation
-##### Clone and install requirements
-    $ git clone https://github.com/eriklindernoren/PyTorch-YOLOv3
-    $ cd PyTorch-YOLOv3/
-    $ sudo pip3 install -r requirements.txt
+## 1. 개요
 
-##### Download pretrained weights
-    $ cd weights/
-    $ bash download_weights.sh
+---
 
-##### Download COCO
-    $ cd data/
-    $ bash get_coco_dataset.sh
-    
-## Test
-Evaluates the model on COCO test.
+![images/Untitled.png](images/Untitled.png)
 
-    $ python3 test.py --weights_path weights/yolov3.weights
+그림 1: [https://user-images.githubusercontent.com/13328380/49785835-250e0480-fd65-11e8-87b9-fd74459ade47.jpg](https://user-images.githubusercontent.com/13328380/49785835-250e0480-fd65-11e8-87b9-fd74459ade47.jpg)
 
-| Model                   | mAP (min. 50 IoU) |
-| ----------------------- |:-----------------:|
-| YOLOv3 608 (paper)      | 57.9              |
-| YOLOv3 608 (this impl.) | 57.3              |
-| YOLOv3 416 (paper)      | 55.3              |
-| YOLOv3 416 (this impl.) | 55.5              |
+**객체 탐지(Object Detection)**란 *그림 1*과 같이 이미지 상에 있는 물체를 인식하는 것을 말한다. 객체 탐지는 총 2개의 작업을 동시에 하는 것인데, 하나는 이미지 안에 있는 한 물체를 **분류(Classification)**하는 것이고, 다른 하나는 이미지 안에 물체가 어디있는지 **위치 정보를 알아내는(Localization)** 것이다. *그림 1*에는 많은 사람과 조각상 들이 있는데, 그들의 위치와 종류를 서로 다른 색깔의 박스로 표현한 것을 볼 수 있다.
 
-## Inference
-Uses pretrained weights to make predictions on images. Below table displays the inference times when using as inputs images scaled to 256x256. The ResNet backbone measurements are taken from the YOLOv3 paper. The Darknet-53 measurement marked shows the inference time of this implementation on my 1080ti card.
+이 객체 탐지는 과거부터 많이 연구가 진행되던 분야로, 초기에는 고전적인 컴퓨터 비전(Computer Vision) 기반으로 연구 및 구현이 진행되었다. (대표적인 예로 HOG(Histograms of Oriented Gradients)와 같은 알고리즘이 있다.) 하지만 그 이후에 사용할 수 있는 데이터 양이 증가하고 컴퓨팅 성능이 향상되면서 **딥러닝 기반의 이미지 인식 알고리즘(CNN기반)** 이 나오게 되었고, 고전적인 방법과 비교했을 때 월등히 좋은 성능을 보여주어 최근에는 딥러닝 기반으로 계속해서 많은 연구가 진행되고 있다.
 
-| Backbone                | GPU      | FPS      |
-| ----------------------- |:--------:|:--------:|
-| ResNet-101              | Titan X  | 53       |
-| ResNet-152              | Titan X  | 37       |
-| Darknet-53 (paper)      | Titan X  | 76       |
-| Darknet-53 (this impl.) | 1080ti   | 74       |
+![images/Untitled%201.png](images/Untitled%201.png)
 
-    $ python3 detect.py --image_folder data/samples/
+그림 2: [https://pjreddie.com/darknet/yolo/](https://pjreddie.com/darknet/yolo/)
 
-<p align="center"><img src="assets/giraffe.png" width="480"\></p>
-<p align="center"><img src="assets/dog.png" width="480"\></p>
-<p align="center"><img src="assets/traffic.png" width="480"\></p>
-<p align="center"><img src="assets/messi.png" width="480"\></p>
+Yolo는 위에서 볼 수 있듯이 You only look once의 줄인말이다. Yolo가 나오기 전에 개발되었던 Object detector들은 모두 Two-Stage Detector로, 아래 *그림3*에서 볼 수 있듯이 두 단계를 거쳐서 최종적인 결과가 나오는 구조를 가지고 있다. 반면 Yolo는 **One-Stage Detector**로 한번의 단계로 최종 결과를 만들어 내는 것이다. 이를 통해 성능 향상을 이루었고, Real-time으로 물체들을 인식 할 수 있다.
 
-## Train
-```
-$ train.py [-h] [--epochs EPOCHS]
-                [--model_def MODEL_DEF] [--data_config DATA_CONFIG]
-                [--pretrained_weights PRETRAINED_WEIGHTS] [--n_cpu N_CPU]
-                [--img_size IMG_SIZE]
-                [--checkpoint_interval CHECKPOINT_INTERVAL]
-                [--evaluation_interval EVALUATION_INTERVAL]
-                [--multiscale_training MULTISCALE_TRAINING]
-```
+![images/Untitled%202.png](images/Untitled%202.png)
 
-#### Example (COCO)
-To train on COCO using a Darknet-53 backend pretrained on ImageNet run: 
-```
-$ python3 train.py --data_config config/coco.data  --pretrained_weights weights/darknet53.conv.74
-```
+그림 3: [https://blog.kakaocdn.net/dn/6590G/btqCWbQVnkx/grxthKJ38iTwEIpqdX2TWk/img.png](https://blog.kakaocdn.net/dn/6590G/btqCWbQVnkx/grxthKJ38iTwEIpqdX2TWk/img.png)
 
-#### Training log
-```
----- [Epoch 7/100, Batch 7300/14658] ----
-+------------+--------------+--------------+--------------+
-| Metrics    | YOLO Layer 0 | YOLO Layer 1 | YOLO Layer 2 |
-+------------+--------------+--------------+--------------+
-| grid_size  | 16           | 32           | 64           |
-| loss       | 1.554926     | 1.446884     | 1.427585     |
-| x          | 0.028157     | 0.044483     | 0.051159     |
-| y          | 0.040524     | 0.035687     | 0.046307     |
-| w          | 0.078980     | 0.066310     | 0.027984     |
-| h          | 0.133414     | 0.094540     | 0.037121     |
-| conf       | 1.234448     | 1.165665     | 1.223495     |
-| cls        | 0.039402     | 0.040198     | 0.041520     |
-| cls_acc    | 44.44%       | 43.59%       | 32.50%       |
-| recall50   | 0.361111     | 0.384615     | 0.300000     |
-| recall75   | 0.222222     | 0.282051     | 0.300000     |
-| precision  | 0.520000     | 0.300000     | 0.070175     |
-| conf_obj   | 0.599058     | 0.622685     | 0.651472     |
-| conf_noobj | 0.003778     | 0.004039     | 0.004044     |
-+------------+--------------+--------------+--------------+
-Total Loss 4.429395
----- ETA 0:35:48.821929
-```
+자율주행 자동차가 안전하고 정확하게 주행하기 위해서는 실시간성이 굉장히 중요하다. 자율주행 자동차는 객체를 인식해서 상황에 맞는 주행을 해야 하는데, 대부분의 Object Detector들은 fps가 10-20 정도로 실시간성이 굉장히 떨어진다. 하지만 Yolo는 비교적 높은 인식률을 보여주면서 최소 30fps 정도의 성능을 보여주기 때문에 자율주행 인지에서 사용하기 적합한 모델이라고 할 수 있다. 
 
-#### Tensorboard
-Track training progress in Tensorboard:
-* Initialize training
-* Run the command below
-* Go to http://localhost:6006/
+Yolo는 초기 버전인 v1부터 최근 비공식적으로 v5까지 나온 상태다. 이들 중 이전 버전보다 성능 향상을 이루었으며, 공식적으로 인정받은 v3를 살펴볼 예정이다. 아래는 다른 one-stage detector인 RetinaNet과의 성능을 비교한 그래프이다.
 
-```
-$ tensorboard --logdir='logs' --port=6006
-```
+![images/Untitled%203.png](images/Untitled%203.png)
 
-Storing the logs on a slow drive possibly leads to a significant training speed decrease.
+그림 4: [https://arxiv.org/pdf/1804.02767.pdf](https://arxiv.org/pdf/1804.02767.pdf)
 
-You can adjust the log directory using `--logdir <path>` when running `tensorboard` or the `train.py`.
-
-## Train on Custom Dataset
-
-#### Custom model
-Run the commands below to create a custom model definition, replacing `<num-classes>` with the number of classes in your dataset.
-
-```
-$ cd config/                                # Navigate to config dir
-$ bash create_custom_model.sh <num-classes> # Will create custom model 'yolov3-custom.cfg'
-```
-
-#### Classes
-Add class names to `data/custom/classes.names`. This file should have one row per class name.
-
-#### Image Folder
-Move the images of your dataset to `data/custom/images/`.
-
-#### Annotation Folder
-Move your annotations to `data/custom/labels/`. The dataloader expects that the annotation file corresponding to the image `data/custom/images/train.jpg` has the path `data/custom/labels/train.txt`. Each row in the annotation file should define one bounding box, using the syntax `label_idx x_center y_center width height`. The coordinates should be scaled `[0, 1]`, and the `label_idx` should be zero-indexed and correspond to the row number of the class name in `data/custom/classes.names`.
-
-#### Define Train and Validation Sets
-In `data/custom/train.txt` and `data/custom/valid.txt`, add paths to images that will be used as train and validation data respectively.
-
-#### Train
-To train on the custom dataset run:
-
-```
-$ python3 train.py --model_def config/yolov3-custom.cfg --data_config config/custom.data
-```
-
-Add `--pretrained_weights weights/darknet53.conv.74` to train using a backend pretrained on ImageNet.
+원래 Yolo는 Darknet 기반으로 구현이 되어있지만, 여기서는 Yolo를 Pytorch로 코드가 구현되어 있다.
 
 
-## Credit
+## 2 구성
 
-### YOLOv3: An Incremental Improvement
-_Joseph Redmon, Ali Farhadi_ <br>
+---
 
-**Abstract** <br>
-We present some updates to YOLO! We made a bunch
-of little design changes to make it better. We also trained
-this new network that’s pretty swell. It’s a little bigger than
-last time but more accurate. It’s still fast though, don’t
-worry. At 320 × 320 YOLOv3 runs in 22 ms at 28.2 mAP,
-as accurate as SSD but three times faster. When we look
-at the old .5 IOU mAP detection metric YOLOv3 is quite
-good. It achieves 57.9 AP50 in 51 ms on a Titan X, compared
-to 57.5 AP50 in 198 ms by RetinaNet, similar performance
-but 3.8× faster. As always, all the code is online at
-https://pjreddie.com/yolo/.
+내가 사용한 프로젝트 코드의 구성을 알아보고, Yolo 모델 구성에 대해 알아보았다.
 
-[[Paper]](https://pjreddie.com/media/files/papers/YOLOv3.pdf) [[Project Webpage]](https://pjreddie.com/darknet/yolo/) [[Authors' Implementation]](https://github.com/pjreddie/darknet)
+### 2.1 소스코드 구성
 
-```
-@article{yolov3,
-  title={YOLOv3: An Incremental Improvement},
-  author={Redmon, Joseph and Farhadi, Ali},
-  journal = {arXiv},
-  year={2018}
-}
-```
+대략적인 소스코드 구성은 아래와 같은 트리구조로 되어있다.
+
+- **train.py**: 모델 학습(train) 로직 구현
+- **test.py**: 모델 평가(evaluation) 로직 구현
+- **detect.py**: 학습 된 모델로 inference 진행
+- **models.py**: 딥러닝 네트워크 모델 구현
+- **utils**: train/evaluation 과정에서 필요한 여러 모듈들을 담은 폴더
+    - **augmentations.py**: 데이터 augmentation 구현 (imgaug 모듈 사용)
+    - **datasets.py**: 데이터셋 처리 함수, loader 구현
+    - **logger.py**: logger 구현
+    - **loss.py**: iou 계산 함수, loss 계산 함수 구현
+    - **parse_config.py**: model/data config file을 파싱하는 함수 구현
+    - **transforms.py**: transform 로직 구현
+    - **utils.py**: iou 계산, ap 계산, box rescale, nms 등 핵심 로직 구현
+- **config**: 모델과 학습 관련된 파라미터, 정보들을 담은 폴더
+    - **coco.data**: 결과 class 개수, train/valid path를 담은 파일 경로, class 이름을 담은 파일 경로를 정하는 셋팅 파일
+    - **yolov3.cfg**: 학습 관련된 hyperparameter들, 각 layer의 hyperparameter 관련된 셋팅 파일
+- **data**: train/evaluation 을 위한 데이터를 관리하는 폴더
+
+### 2.2 모델 구성
+
+Yolo v3는 Yolo v1 모델에 성능 향상을 위해 특정 부분을 수정한 것이다. 핵심 모델 형태와 방법론은 동일하므로, 여기서는 모델 구성을 Yolo v1 paper 기준으로 이해해 보려고 한다.
+
+![images/Untitled%2030.png](images/Untitled%2030.png)
+
+그림 5: [https://arxiv.org/pdf/1506.02640.pdf](https://arxiv.org/pdf/1506.02640.pdf)
+
+Yolo는 이전에 나왔던 다른 object detection 모델과 가장 큰 차이점은 한번에 classification과 localization을 한다는데 있다. *그림 5*에 나와있듯이 Yolo는 이미지를 SxS로 나누고 그 안에서 `Bounding box + Confidence value` 와 `Class probability` 를 구해서 최종적인 객체들을 인식하게 되는데, 중요한 것은 이 두개의 결과가 하나의 네트워크의 output으로 나온다는데 있다.
+
+![images/Untitled%2031.png](images/Untitled%2031.png)
+
+그림 6: [https://arxiv.org/pdf/1506.02640.pdf](https://arxiv.org/pdf/1506.02640.pdf)
+
+*그림 6*에 나와있는 구조가 Yolo 네트워크 구조이다. 24개의 Conv layer 로 되어있으며, 2개의 FCN으로 되어있어 최종적인 output은 7x7x30크기의 tensor로 되어있다. 이 output tensor를 아래에서 조금 더 자세히 살펴보자
+
+![images/Untitled%2032.png](images/Untitled%2032.png)
+
+그림 7: [https://miro.medium.com/max/1406/1*YG6heD55fEmZeUKRSlsqlA.png](https://miro.medium.com/max/1406/1*YG6heD55fEmZeUKRSlsqlA.png)
+
+*그림 7*을 보면 output tensor (7x7x30) 중 1-5번째 채널까지는 첫번째 bounding box에 대한 정보(confidence, x, y, width, height)를 담고 있고 6-10번째 채널에서는 두번째 bounding box 정보를 가지고 있다. 나머지 11-30 번째 채널에서는 각 class에 대한 probability를 담고있는데, 즉 1-10번째 채널까지가 위에서 설명한 `Boundng box + Confidence` 에 해당되며 11-30번째 채널까지가 `Class probability` 에 해당한다.
+
+정리하면, Yolo는 네트워크 하나로 Classification과 Localization을 동시에 수행하는 모델이며, 이러한 방식으로 실시간성을 보장할 수 있다.
+
+## 3 활용 및 결과
+
+---
+
+![images/Untitled%2033.png](images/Untitled%2033.png)
+
+[https://neilyongyangnie.files.wordpress.com/2018/11/0_hmacefect2pyqoxf.jpg?w=1280](https://neilyongyangnie.files.wordpress.com/2018/11/0_hmacefect2pyqoxf.jpg?w=1280)
+
+Yolo는 real-time object detection인 만큼 실시간성이 뛰어나 자율주행에서 사용하기에 적합하다. 자율주행을 하다보면 **전방 차량, 표지판, 신호등, 보행자** 등 인식해야 할 객체들이 많은데, 그 객체들을 카메라와 Yolo 알고리즘을 통해 인식할 수 있다. 전방 차량을 인식하여 앞 차간 거리를 유지할 수 있으며, 표지판을 인식하여 주행 정보를 얻을 수 있고, 신호등을 인식하여 교통 법규를 지키며 주행할 수 있다. 또한 보행자나 다른 물체가 차량 경로상에 갑자기 들어오는 경우 위험 상황도 판단하여 대처할 수 있을 것이다.
